@@ -2,6 +2,7 @@ package com.break2bits.message.header
 
 data class StunHeader(
     val messageType: StunMessageType,
+    // length of message not including the header
     val messageLength: UShort,
     val magicCookie: UInt,
     val transactionId: ByteArray,
