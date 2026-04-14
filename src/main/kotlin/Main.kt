@@ -4,7 +4,8 @@ import com.break2bits.cli.ArgDefinition
 import com.break2bits.cli.BoolArgDefinition
 import com.break2bits.cli.IntArgDefinition
 import com.break2bits.cli.StunServerArgParser
-import com.sun.tools.javac.tree.TreeInfo.args
+import com.break2bits.parse.StunHeaderParser
+import com.break2bits.parse.StunMessageParser
 import kotlin.system.exitProcess
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -16,27 +17,30 @@ fun main(args: Array<String>) {
     val tcpEnabledArg = BoolArgDefinition("-t", "--tcp", default = false)
 
     try {
-        val argParser = StunServerArgParser(args);
+        val argParser = StunServerArgParser(args)
 
-        val port = argParser.getInt(portArg);
+        val port = argParser.getInt(portArg)
         if (port < 1) {
-            throw IllegalArgumentException("Value of $portArg must be greater than or equal to 1, got $port");
+            throw IllegalArgumentException("Value of $portArg must be greater than or equal to 1, got $port")
         }
 
-        val threads = argParser.getInt(threadsArg);
+        val threads = argParser.getInt(threadsArg)
         if (port < 1) {
-            throw IllegalArgumentException("Value of $threadsArg must be greater than or equal to 1, got $threads");
+            throw IllegalArgumentException("Value of $threadsArg must be greater than or equal to 1, got $threads")
         }
 
-        val udpEnabled = argParser.getBool(udpEnabledArg);
+        val udpEnabled = argParser.getBool(udpEnabledArg)
 
-        val tcpEnabled = argParser.getBool(tcpEnabledArg);
+        val tcpEnabled = argParser.getBool(tcpEnabledArg)
 
         if (!tcpEnabled && !udpEnabled) {
-            throw IllegalArgumentException("Either $tcpEnabledArg or $udpEnabledArg must be set");
+            throw IllegalArgumentException("Either $tcpEnabledArg or $udpEnabledArg must be set")
         }
 
-        println("Starting Stun server with the following config:\nport: $port\nthreads: $threads\nudpEnabled: $udpEnabled\ntcpEnabled: $tcpEnabled");
+        println("Starting Stun server with the following config:\nport: $port\nthreads: $threads\nudpEnabled: $udpEnabled\ntcpEnabled: $tcpEnabled")
+
+        val stunServer = createStunServer(port, udpEnabled, tcpEnabled)
+        stunServer.start()
     } catch (exception: IllegalArgumentException) {
         printHelpAndExit(exception, listOf(portArg, threadsArg, udpEnabledArg, tcpEnabledArg))
     }
@@ -51,4 +55,16 @@ private fun printHelpAndExit(exception: IllegalArgumentException, argDefs: List<
         ${argDefs.joinToString("\n        ")}
     """.trimIndent())
     exitProcess(-1)
+}
+
+private fun createStunServer(port: Int, udpEnabled: Boolean, tcpEnabled: Boolean): UdpStunServer {
+    if (udpEnabled) {
+        return UdpStunServer(
+            port = port,
+            stunMessageParser = StunMessageParser(
+                stunHeaderParser = StunHeaderParser()
+            )
+        )
+    }
+    throw NotImplementedError("TCP stun server not yet implemented");
 }
