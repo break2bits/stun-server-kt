@@ -30,7 +30,7 @@ class UdpStunServer(
                 // create a response based on the input request
                 val response = stunHandler.handle(request)
 
-                // serialize the resposne
+                // serialize the response
                 val responseData = stunMessageSerializer.serialize(response)
 
                 // wrap the response in a UDP datagram addressed to the sender
