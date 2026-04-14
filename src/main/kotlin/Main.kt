@@ -6,6 +6,7 @@ import com.break2bits.cli.IntArgDefinition
 import com.break2bits.cli.StunServerArgParser
 import com.break2bits.parse.StunHeaderParser
 import com.break2bits.parse.StunMessageParser
+import com.break2bits.serialize.StunMessageSerializer
 import kotlin.system.exitProcess
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -63,7 +64,9 @@ private fun createStunServer(port: Int, udpEnabled: Boolean, tcpEnabled: Boolean
             port = port,
             stunMessageParser = StunMessageParser(
                 stunHeaderParser = StunHeaderParser()
-            )
+            ),
+            stunHandler = StunHandler(),
+            stunMessageSerializer = StunMessageSerializer(),
         )
     }
     throw NotImplementedError("TCP stun server not yet implemented");

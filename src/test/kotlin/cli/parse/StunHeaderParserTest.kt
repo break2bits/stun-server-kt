@@ -38,7 +38,7 @@ class StunHeaderParserTest {
     }
 
     @Test
-    fun testParse_messageLengthTooShort() {
+    fun testParse_invalidMessageLength() {
         val buff = ByteBuffer.wrap(byteArrayOf(0x00, 0x01, 0x00, 0x09))
         val parser = StunHeaderParser()
 
@@ -51,7 +51,7 @@ class StunHeaderParserTest {
 
     @Test
     fun testParse_invalidMagicCookie() {
-        val topFour = byteArrayOf(0x0, 0x1, 0xf, 0xf)
+        val topFour = byteArrayOf(0x0, 0x1, 0xf, 0x10)
         val magicCookieData = 0xffffu
         val buff = ByteBuffer.wrap(topFour.plus(magicCookieData.toByteArray()))
         val parser = StunHeaderParser()

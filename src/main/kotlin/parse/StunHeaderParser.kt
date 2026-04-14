@@ -1,6 +1,5 @@
 package com.break2bits.parse
 
-import com.break2bits.message.StunMessage
 import com.break2bits.message.header.StunHeader
 import com.break2bits.message.header.StunMessageType
 import java.nio.BufferUnderflowException
@@ -41,8 +40,8 @@ class StunHeaderParser {
     }
 
     private fun validateMessageLength(messageLength: UShort) {
-        if (messageLength < 20u) {
-            throw StunParseException("Invalid message length, must include at least header length of 20 bytes: $messageLength");
+        if (messageLength.mod(4u) != 0u) {
+            throw StunParseException("Invalid message length, must be a multiple of 4: $messageLength");
         }
     }
 
