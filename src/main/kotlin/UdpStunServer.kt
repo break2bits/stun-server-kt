@@ -1,5 +1,6 @@
 package com.break2bits
 
+import com.break2bits.handler.StunHandler
 import com.break2bits.parse.StunMessageParser
 import com.break2bits.serialize.StunMessageSerializer
 import java.net.DatagramPacket

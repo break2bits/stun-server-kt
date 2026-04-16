@@ -17,6 +17,11 @@ enum class StunAttributeType(private val value: UShort) {
     FINGERPRINT(0x8028u);
 
     public companion object {
+        public val COMPREHENSION_REQUIRED_TYPES = setOf(
+            MAPPED_ADDRESS, USERNAME, MESSAGE_INTEGRITY, ERROR_CODE, UNKNOWN_ATTRIBUTES, REALM, NONCE, XOR_MAPPED_ADDRESS
+        )
+        public val COMPREHENSION_OPTIONAL_TYPES = setOf(SOFTWARE, ALTERNATE_SERVER, FINGERPRINT)
+
         fun fromBinary(value: UShort): StunAttributeType {
             entries.forEach {
                 if (it.value == value) {

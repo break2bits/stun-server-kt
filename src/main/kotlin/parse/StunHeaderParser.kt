@@ -8,14 +8,15 @@ import java.nio.ByteBuffer
 class StunHeaderParser {
     fun parse(buff: ByteBuffer): StunHeader {
         try {
-            val messageTypeData: UShort = buff.getShort().toUShort();
-            val messageType = parseMessageType(messageTypeData);
+            val messageTypeData: UShort = buff.getShort().toUShort()
+            validateTopTwoBitsZero(messageTypeData)
+            val messageType = parseMessageType(messageTypeData)
 
-            val messageLength = buff.getShort().toUShort();
-            validateMessageLength(messageLength);
+            val messageLength = buff.getShort().toUShort()
+            validateMessageLength(messageLength)
 
-            val magicCookie = buff.getInt().toUInt();
-            validateMagicCookie(magicCookie);
+            val magicCookie = buff.getInt().toUInt()
+            validateMagicCookie(magicCookie)
 
             val transactionId = ByteArray(12)
             buff.get(transactionId)
@@ -31,6 +32,12 @@ class StunHeaderParser {
         }
     }
 
+    private fun validateTopTwoBitsZero(data: UShort) {
+        if ((data.toInt() ushr 14) > 0) {
+            throw StunParseException("The first two bits of a Stun message must both be 0")
+        }
+    }
+
     private fun parseMessageType(messageTypeData: UShort): StunMessageType {
         try {
             return StunMessageType.fromBinary(messageTypeData)
@@ -41,7 +48,7 @@ class StunHeaderParser {
 
     private fun validateMessageLength(messageLength: UShort) {
         if (messageLength.mod(4u) != 0u) {
-            throw StunParseException("Invalid message length, must be a multiple of 4: $messageLength");
+            throw StunParseException("Invalid message length, must be a multiple of 4: $messageLength")
         }
     }
 

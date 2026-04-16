@@ -26,6 +26,18 @@ class StunHeaderParserTest {
     }
 
     @Test
+    fun testParse_topTwoNotZero() {
+        val buff = ByteBuffer.wrap(byteArrayOf(0b10111111u.toByte(), 0xffu.toByte()))
+        val parser = StunHeaderParser()
+
+        val exception = assertThrows<StunParseException> {
+            parser.parse(buff)
+        }
+
+        assertContains(exception.message!!, "The first two bits")
+    }
+
+    @Test
     fun testParse_invalidMessageType() {
         val buff = ByteBuffer.wrap(byteArrayOf(0xf, 0xf))
         val parser = StunHeaderParser()

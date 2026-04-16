@@ -1,6 +1,6 @@
 package com.break2bits.message.header
 
-enum class StunMessageType(private val value: UShort) {
+enum class StunMessageType(val value: UShort) {
     BINDING_REQUEST(0b000000000001u),
     INDICATION_REQUEST(0b000000010001u),
     BINDING_RESPONSE(0b000100000001u),
