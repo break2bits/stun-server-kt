@@ -9,6 +9,8 @@ data class StunHeader(
 ) {
     public companion object {
         public const val MAGIC_COOKIE: UInt = 0x2112A442u
+        public const val OFFSET = 0
+        public const val LENGTH_BYTES = 20
     }
 
     override fun equals(other: Any?): Boolean {

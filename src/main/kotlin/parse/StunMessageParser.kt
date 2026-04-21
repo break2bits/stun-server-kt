@@ -15,7 +15,8 @@ class StunMessageParser(
         val attributes = stunAttributesParser.parse(buff, header.messageLength)
         return StunMessage(
             header = header,
-            attributes = attributes
+            attributes = attributes,
+            bytes = messageData,
         )
     }
 

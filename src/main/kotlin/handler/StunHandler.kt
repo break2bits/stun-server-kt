@@ -5,12 +5,16 @@ import com.break2bits.message.StunMessage
 import com.break2bits.message.header.StunHeader
 import com.break2bits.message.header.StunMessageType
 
-class StunHandler {
-    fun handle(message: StunMessage): StunMessage {
+class StunHandler(
+    private val messageIntegrityValidator: MessageIntegrityValidator
+) {
+    fun handle(message: StunMessage): StunMessage? {
         validateMessageType(message.header)
 
+        // if indication, no response is necessary
         val responseMessageType = StunMessageType.BINDING_RESPONSE
-        
+
+        messageIntegrityValidator.validate(message)
 
         throw NotImplementedError("Message processing not yet implemented")
     }
@@ -21,4 +25,6 @@ class StunHandler {
             throw StunRequestException("Server only serves BINDING requests of message type $binStr")
         }
     }
+
+
 }

@@ -9,6 +9,10 @@ import java.net.DatagramSocket
 /*
 Stun header is 20 bytes
 Stun message is variable length
+
+What if instead of serializing and deserializing we just deal in bytes
+
+1. Every part of the stun message has an offset, a length and maybe a memoized deserialized value
  */
 class UdpStunServer(
     private val port: Int,
@@ -30,6 +34,9 @@ class UdpStunServer(
 
                 // create a response based on the input request
                 val response = stunHandler.handle(request)
+                if (response == null) { // for indications
+                    continue
+                }
 
                 // serialize the response
                 val responseData = stunMessageSerializer.serialize(response)

@@ -21,6 +21,7 @@ class StunAttributesParser {
     }
 
     private fun parseAttribute(buff: ByteBuffer): StunAttribute {
+        val offset = buff.arrayOffset()
         val attributeType = parseAttributeType(buff)
         val attributeLength = buff.getShort().toUShort()
         validateAttributeLength(attributeLength)
@@ -28,8 +29,9 @@ class StunAttributesParser {
         buff.get(attributeValue)
         return StunAttribute(
             type = attributeType,
-            length = attributeLength,
-            value = attributeValue
+            valueLength = attributeLength,
+            value = attributeValue,
+            offset = offset
         )
     }
 

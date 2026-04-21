@@ -2,9 +2,18 @@ package com.break2bits.message.attribute
 
 data class StunAttribute(
     val type: StunAttributeType,
-    val length: UShort, // length of value
+    val valueLength: UShort, // length of value
     val value: ByteArray,
+    val offset: Int, // byte offset from start of Stun message
 ) {
+    companion object {
+        const val ATTRIBUTE_HEADER_SIZE_BYTES = 2
+    }
+
+    fun getLengthBytes(): Int {
+        return ATTRIBUTE_HEADER_SIZE_BYTES + valueLength.toInt()
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -12,7 +21,7 @@ data class StunAttribute(
         other as StunAttribute
 
         if (type != other.type) return false
-        if (length != other.length) return false
+        if (valueLength != other.valueLength) return false
         if (!value.contentEquals(other.value)) return false
 
         return true
@@ -20,7 +29,7 @@ data class StunAttribute(
 
     override fun hashCode(): Int {
         var result = type.hashCode()
-        result = 31 * result + length.hashCode()
+        result = 31 * result + valueLength.hashCode()
         result = 31 * result + value.contentHashCode()
         return result
     }
