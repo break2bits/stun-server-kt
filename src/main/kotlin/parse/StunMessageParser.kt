@@ -1,14 +1,13 @@
 package com.break2bits.parse
 
 import com.break2bits.message.StunMessage
-import java.net.InetAddress
 import java.nio.ByteBuffer
 
 class StunMessageParser(
     private val stunHeaderParser: StunHeaderParser,
     private val stunAttributesParser: StunAttributesParser
 ) {
-    fun parse(messageData: ByteArray, senderAddress: InetAddress, senderPort: Int): StunMessage {
+    fun parse(messageData: ByteArray): StunMessage {
         val buff = ByteBuffer.wrap(messageData)
         val header = stunHeaderParser.parse(buff)
         validateMessageLength(header.messageLength, buff.remaining())

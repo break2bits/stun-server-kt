@@ -4,6 +4,7 @@ import com.break2bits.cli.ArgDefinition
 import com.break2bits.cli.BoolArgDefinition
 import com.break2bits.cli.IntArgDefinition
 import com.break2bits.cli.StunServerArgParser
+import com.break2bits.handler.MessageIntegrityValidator
 import com.break2bits.handler.StunHandler
 import com.break2bits.parse.StunAttributesParser
 import com.break2bits.parse.StunHeaderParser
@@ -68,7 +69,9 @@ private fun createStunServer(port: Int, udpEnabled: Boolean, tcpEnabled: Boolean
                 stunHeaderParser = StunHeaderParser(),
                 stunAttributesParser = StunAttributesParser()
             ),
-            stunHandler = StunHandler(),
+            stunHandler = StunHandler(
+                messageIntegrityValidator = MessageIntegrityValidator()
+            ),
             stunMessageSerializer = StunMessageSerializer(),
         )
     }

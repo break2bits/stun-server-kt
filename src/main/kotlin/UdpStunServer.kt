@@ -30,10 +30,10 @@ class UdpStunServer(
                 activeSocket.receive(requestDatagram)
 
                 // parse and validate the raw binary data
-                val request = stunMessageParser.parse(requestDatagram.data, requestDatagram.address, requestDatagram.port)
+                val request = stunMessageParser.parse(requestDatagram.data)
 
                 // create a response based on the input request
-                val response = stunHandler.handle(request)
+                val response = stunHandler.handle(request, requestDatagram.address, requestDatagram.port)
                 if (response == null) { // for indications
                     continue
                 }
