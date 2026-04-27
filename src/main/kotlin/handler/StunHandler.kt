@@ -28,7 +28,7 @@ class StunHandler(
         val responseMessageType = StunMessageType.BINDING_RESPONSE
 
         val hadFingerprint = maybeValidateFingerprintAttribute(message)
-        val xorMappedAddressAttr = createXorMappedAddressAttribute(senderAddress, senderPort)
+        val xorMappedAddressAttr = createXorMappedAddressAttribute(message.header, senderAddress, senderPort)
         // authentication is optional
         // messageIntegrityValidator.validate(message)
         // check for fingerprint
@@ -63,21 +63,27 @@ class StunHandler(
         return true
     }
 
-    private fun createXorMappedAddressAttribute(senderAddress: InetAddress, senderPort: Int): StunAttribute {
+    private fun createXorMappedAddressAttribute(header: StunHeader, senderAddress: InetAddress, senderPort: Int): StunAttribute {
         val magicCookieTopTwoBytes = getMagicCookieTopTwoBytesAsInt()
         val xPort = senderPort xor magicCookieTopTwoBytes
 
         var xAddress: ByteArray
         if (senderAddress.address.size == IPV6_ADDRESS_SIZE_BYTES) {
             // IPV4 xAddress calculation
-
             xAddress = senderAddress.address.xor(StunHeader.MAGIC_COOKIE.toByteArray())
         } else if (senderAddress.address.size == IPV6_ADDRESS_SIZE_BYTES) {
             // IPV6 xAddress calculation
-            
+            val magicCookieAndTxnId = StunHeader.MAGIC_COOKIE.toByteArray().plus(header.transactionId)
+            xAddress = senderAddress.address.xor(magicCookieAndTxnId)
         } else {
             throw IllegalArgumentException("Unrecognized address format: ${senderAddress.hostAddress}")
         }
+        return StunAttribute(
+            type = StunAttributeType.XOR_MAPPED_ADDRESS,
+            valueLength = xAddress.size.toUShort(),
+            value = xAddress,
+            offset = -1
+        )
     }
 
     private fun getMagicCookieTopTwoBytesAsInt(): Int {

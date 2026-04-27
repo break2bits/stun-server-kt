@@ -26,7 +26,6 @@ class MessageIntegrityValidator {
         // mac.init(key) set the key on the mac using SASL password
         mac.update(message.bytes, 0, messageIntegAttrAndPos.attribute.offset)
 
-
         val hmac = mac.doFinal()
     }
 }
