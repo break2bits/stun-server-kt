@@ -9,18 +9,16 @@ import com.break2bits.message.attribute.StunAttributeType
 import com.break2bits.message.attribute.StunAttributeValue
 import com.break2bits.message.header.StunHeader
 import com.break2bits.message.header.StunMessageType
+import com.break2bits.serialize.attribute.XorMappedAddressValueSerializer
 import java.net.InetAddress
+import java.net.StandardProtocolFamily
 import java.nio.ByteBuffer
 import java.util.zip.CRC32
 
 class StunHandler(
-    private val messageIntegrityValidator: MessageIntegrityValidator
+    private val messageIntegrityValidator: MessageIntegrityValidator,
+    private val xorMappedAddressValueSerializer: XorMappedAddressValueSerializer
 ) {
-    private companion object {
-        private const val IPV4_ADDRESS_SIZE_BYTES = 4
-        private const val IPV6_ADDRESS_SIZE_BYTES = 16
-    }
-
     fun handle(message: StunMessage, senderAddress: InetAddress, senderPort: Int): StunMessage? {
         validateMessageType(message.header)
 
@@ -67,21 +65,29 @@ class StunHandler(
         val magicCookieTopTwoBytes = getMagicCookieTopTwoBytesAsInt()
         val xPort = senderPort xor magicCookieTopTwoBytes
 
-        var xAddress: ByteArray
-        if (senderAddress.address.size == IPV6_ADDRESS_SIZE_BYTES) {
+        val family: StandardProtocolFamily
+        val xAddress: ByteArray
+        if (senderAddress.address.size == XorMappedAddressValueSerializer.IPV4_ADDRESS_SIZE_BYTES) {
             // IPV4 xAddress calculation
+            family = StandardProtocolFamily.INET
             xAddress = senderAddress.address.xor(StunHeader.MAGIC_COOKIE.toByteArray())
-        } else if (senderAddress.address.size == IPV6_ADDRESS_SIZE_BYTES) {
+        } else if (senderAddress.address.size == XorMappedAddressValueSerializer.IPV6_ADDRESS_SIZE_BYTES) {
             // IPV6 xAddress calculation
             val magicCookieAndTxnId = StunHeader.MAGIC_COOKIE.toByteArray().plus(header.transactionId)
+            family = StandardProtocolFamily.INET6
             xAddress = senderAddress.address.xor(magicCookieAndTxnId)
         } else {
             throw IllegalArgumentException("Unrecognized address format: ${senderAddress.hostAddress}")
         }
+        val attributeValue = xorMappedAddressValueSerializer.serializeValue(
+            family = family,
+            xPort = xPort,
+            xAddress = xAddress,
+        )
         return StunAttribute(
             type = StunAttributeType.XOR_MAPPED_ADDRESS,
-            valueLength = xAddress.size.toUShort(),
-            value = xAddress,
+            valueLength = attributeValue.size.toUShort(),
+            value = attributeValue,
             offset = -1
         )
     }
