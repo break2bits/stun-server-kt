@@ -10,6 +10,9 @@ import com.break2bits.parse.StunAttributesParser
 import com.break2bits.parse.StunHeaderParser
 import com.break2bits.parse.StunMessageParser
 import com.break2bits.serialize.StunMessageSerializer
+import com.break2bits.serialize.attribute.StunAttributeWriter
+import com.break2bits.serialize.attribute.XorMappedAddressValueSerializer
+import com.break2bits.serialize.header.StunHeaderWriter
 import kotlin.system.exitProcess
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -70,7 +73,10 @@ private fun createStunServer(port: Int, udpEnabled: Boolean, tcpEnabled: Boolean
                 stunAttributesParser = StunAttributesParser()
             ),
             stunHandler = StunHandler(
-                messageIntegrityValidator = MessageIntegrityValidator()
+                messageIntegrityValidator = MessageIntegrityValidator(),
+                xorMappedAddressValueSerializer = XorMappedAddressValueSerializer(),
+                stunHeaderWriter = StunHeaderWriter(),
+                stunAttributeWriter = StunAttributeWriter(),
             ),
             stunMessageSerializer = StunMessageSerializer(),
         )
