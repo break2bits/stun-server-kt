@@ -12,10 +12,8 @@ import com.break2bits.message.header.StunMessageType
 import com.break2bits.serialize.attribute.StunAttributeWriter
 import com.break2bits.serialize.attribute.XorMappedAddressValueSerializer
 import com.break2bits.serialize.header.StunHeaderWriter
-import com.sun.jdi.ByteValue
 import java.net.InetAddress
 import java.net.StandardProtocolFamily
-import java.nio.Buffer
 import java.nio.ByteBuffer
 import java.util.zip.CRC32
 
