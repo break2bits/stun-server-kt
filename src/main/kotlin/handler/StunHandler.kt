@@ -46,7 +46,7 @@ class StunHandler(
             softwareAttr,
         )
         var fingerprintAttr: StunAttribute? = null
-        if (hadFingerprint) { // if there was a fingerprint in the request we should add one to the response
+        if (hadFingerprint) { // if there was a fingerprint in the request we should add one to the response with a dummy value
             fingerprintAttr = StunAttribute(
                 type = StunAttributeType.FINGERPRINT,
                 valueLength = FINGERPRINT_VALUE_LENGTH_BYTES,
