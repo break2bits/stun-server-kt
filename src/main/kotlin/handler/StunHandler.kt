@@ -9,36 +9,68 @@ import com.break2bits.message.attribute.StunAttributeType
 import com.break2bits.message.attribute.StunAttributeValue
 import com.break2bits.message.header.StunHeader
 import com.break2bits.message.header.StunMessageType
+import com.break2bits.serialize.attribute.StunAttributeWriter
 import com.break2bits.serialize.attribute.XorMappedAddressValueSerializer
+import com.break2bits.serialize.header.StunHeaderWriter
+import com.sun.jdi.ByteValue
 import java.net.InetAddress
 import java.net.StandardProtocolFamily
+import java.nio.Buffer
 import java.nio.ByteBuffer
 import java.util.zip.CRC32
 
 class StunHandler(
     private val messageIntegrityValidator: MessageIntegrityValidator,
-    private val xorMappedAddressValueSerializer: XorMappedAddressValueSerializer
+    private val xorMappedAddressValueSerializer: XorMappedAddressValueSerializer,
+    private val stunHeaderWriter: StunHeaderWriter,
+    private val stunAttributeWriter: StunAttributeWriter,
 ) {
     private companion object {
         private const val SOFTWARE_NAME = "stun-server-kt"
+        private const val FINGERPRINT_VALUE_LENGTH_BYTES: UShort = 4u
     }
 
-    fun handle(message: StunMessage, senderAddress: InetAddress, senderPort: Int): StunMessage? {
-        validateMessageType(message.header)
-
-        // if indication, no response is necessary
-        val responseMessageType = StunMessageType.BINDING_RESPONSE
+    fun handle(request: StunMessage, senderAddress: InetAddress, senderPort: Int): StunMessage? {
+        if (request.header.messageType == StunMessageType.INDICATION_REQUEST) {
+            return null
+        }
+        validateMessageType(request.header)
 
         // authentication is optional
 
-        val hadFingerprint = maybeValidateFingerprintAttribute(message)
-        val xorMappedAddressAttr = createXorMappedAddressAttribute(message.header, senderAddress, senderPort)
+        val hadFingerprint = maybeValidateFingerprintAttribute(request)
+        val xorMappedAddressAttr = createXorMappedAddressAttribute(request.header, senderAddress, senderPort)
         val softwareAttr = createSoftwareAttribute()
+        val attributes = mutableListOf(
+            xorMappedAddressAttr,
+            softwareAttr,
+        )
+        var fingerprintAttr: StunAttribute? = null
         if (hadFingerprint) { // if there was a fingerprint in the request we should add one to the response
-
+            fingerprintAttr = StunAttribute(
+                type = StunAttributeType.FINGERPRINT,
+                valueLength = FINGERPRINT_VALUE_LENGTH_BYTES,
+                value = ByteArray(FINGERPRINT_VALUE_LENGTH_BYTES.toInt()),
+                offset = -1
+            )
         }
+        val header = buildResponseHeader(request, attributes, hadFingerprint)
+        val output = ByteBuffer.allocate(header.messageLength.toInt())
+        stunHeaderWriter.write(output, header)
+        attributes.forEach {
+            stunAttributeWriter.write(output, it)
+        }
+        if (fingerprintAttr != null) {
+            setFingerprintValue(output, fingerprintAttr)
+            stunAttributeWriter.write(output, fingerprintAttr)
+        }
+        val message = StunMessage(
+            header = header,
+            attributes = attributes,
+            bytes = output.array()
+        )
 
-        throw NotImplementedError("Message processing not yet implemented")
+        return message
     }
 
     private fun validateMessageType(message: StunHeader) {
@@ -119,5 +151,26 @@ class StunHandler(
         xorInt = xorInt shl 8
         xorInt = xorInt or magicCookieBytes[1].toInt()
         return xorInt
+    }
+
+    private fun buildResponseHeader(request: StunMessage, attributes: List<StunAttribute>, hasFingerprint: Boolean): StunHeader {
+        var messageLength = attributes.sumOf { it.getLengthBytes() }
+        if (hasFingerprint) {
+            messageLength += FINGERPRINT_VALUE_LENGTH_BYTES.toInt() + StunAttribute.ATTRIBUTE_HEADER_SIZE_BYTES
+        }
+        return StunHeader(
+            messageType = StunMessageType.BINDING_RESPONSE,
+            messageLength = messageLength.toUShort(),
+            magicCookie = StunHeader.MAGIC_COOKIE,
+            transactionId = request.header.transactionId
+        )
+    }
+
+    private fun setFingerprintValue(buffer: ByteBuffer, fingerprintAttr: StunAttribute) {
+        val crc32 = CRC32()
+        val filledArray = buffer.array().sliceArray(IntRange(0, buffer.arrayOffset()))
+        crc32.update(filledArray)
+        val result = crc32.value
+        System.arraycopy(result, 0, fingerprintAttr.value, 0, fingerprintAttr.value.size)
     }
 }

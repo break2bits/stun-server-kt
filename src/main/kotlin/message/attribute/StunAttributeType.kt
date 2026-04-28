@@ -1,6 +1,6 @@
 package com.break2bits.message.attribute
 
-enum class StunAttributeType(private val value: UShort) {
+enum class StunAttributeType(val value: UShort) {
     // Comprehension required
     MAPPED_ADDRESS(0x0001u),
     USERNAME(0x0006u),
