@@ -2,7 +2,6 @@ package com.break2bits
 
 import com.break2bits.handler.StunHandler
 import com.break2bits.parse.StunMessageParser
-import com.break2bits.serialize.StunMessageSerializer
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 
@@ -17,8 +16,7 @@ What if instead of serializing and deserializing we just deal in bytes
 class UdpStunServer(
     private val port: Int,
     private val stunMessageParser: StunMessageParser,
-    private val stunHandler: StunHandler,
-    private val stunMessageSerializer: StunMessageSerializer
+    private val stunHandler: StunHandler
 ) {
     private val socket = DatagramSocket(port)
 
@@ -38,11 +36,8 @@ class UdpStunServer(
                     continue
                 }
 
-                // serialize the response
-                val responseData = stunMessageSerializer.serialize(response)
-
                 // wrap the response in a UDP datagram addressed to the sender
-                val responseDatagram = DatagramPacket(responseData, responseData.size, requestDatagram.address, requestDatagram.port)
+                val responseDatagram = DatagramPacket(response.bytes, response.bytes.size, requestDatagram.address, requestDatagram.port)
 
                 // send the datagram
                 activeSocket.send(responseDatagram)

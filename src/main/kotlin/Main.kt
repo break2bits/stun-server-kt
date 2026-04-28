@@ -9,7 +9,6 @@ import com.break2bits.handler.StunHandler
 import com.break2bits.parse.StunAttributesParser
 import com.break2bits.parse.StunHeaderParser
 import com.break2bits.parse.StunMessageParser
-import com.break2bits.serialize.StunMessageSerializer
 import com.break2bits.serialize.attribute.StunAttributeWriter
 import com.break2bits.serialize.attribute.XorMappedAddressValueSerializer
 import com.break2bits.serialize.header.StunHeaderWriter
@@ -77,8 +76,7 @@ private fun createStunServer(port: Int, udpEnabled: Boolean, tcpEnabled: Boolean
                 xorMappedAddressValueSerializer = XorMappedAddressValueSerializer(),
                 stunHeaderWriter = StunHeaderWriter(),
                 stunAttributeWriter = StunAttributeWriter(),
-            ),
-            stunMessageSerializer = StunMessageSerializer(),
+            )
         )
     }
     throw NotImplementedError("TCP stun server not yet implemented");
