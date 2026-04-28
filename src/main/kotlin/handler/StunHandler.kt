@@ -60,8 +60,9 @@ class StunHandler(
         attributes.forEach {
             stunAttributeWriter.write(output, it)
         }
-        if (fingerprintAttr != null) {
+        if (fingerprintAttr != null) { // finally, update the value of the fingerprint attribute before we add it to the output
             setFingerprintValue(output, fingerprintAttr)
+            attributes.add(fingerprintAttr)
             stunAttributeWriter.write(output, fingerprintAttr)
         }
         val message = StunMessage(
