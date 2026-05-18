@@ -17,13 +17,21 @@ import kotlin.system.exitProcess
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main(args: Array<String>) {
+    val helpArg = BoolArgDefinition("-h", "--help", default = false)
     val portArg = IntArgDefinition("-p", "--port", default = 3478)
     val threadsArg = IntArgDefinition("-n", "--num-threads", default = 1)
     val udpEnabledArg = BoolArgDefinition("-u", "--udp", default = false)
     val tcpEnabledArg = BoolArgDefinition("-t", "--tcp", default = false)
 
+    val argDefs = listOf(helpArg, portArg, threadsArg, udpEnabledArg, tcpEnabledArg)
+
     try {
         val argParser = StunServerArgParser(args)
+
+        if (argParser.getBool(helpArg)) {
+            println(usage(argDefs))
+            exitProcess(0)
+        }
 
         val port = argParser.getInt(portArg)
         if (port < 1) {
@@ -48,19 +56,18 @@ fun main(args: Array<String>) {
         val stunServer = createStunServer(port, udpEnabled, tcpEnabled)
         stunServer.start()
     } catch (exception: IllegalArgumentException) {
-        printHelpAndExit(exception, listOf(portArg, threadsArg, udpEnabledArg, tcpEnabledArg))
+        println("Failed to parse args: ${exception.message}\n")
+        println(usage(argDefs))
+        exitProcess(-1)
     }
 }
 
-private fun printHelpAndExit(exception: IllegalArgumentException, argDefs: List<ArgDefinition>) {
-    println("""
-        Failed to parse args: ${exception.message}
-        
+private fun usage(argDefs: List<ArgDefinition>): String {
+    return """
         Usage: java -jar stun-server-kt.jar --port 8000 --udp
-        
+
         ${argDefs.joinToString("\n        ")}
-    """.trimIndent())
-    exitProcess(-1)
+    """.trimIndent()
 }
 
 private fun createStunServer(port: Int, udpEnabled: Boolean, tcpEnabled: Boolean): UdpStunServer {
