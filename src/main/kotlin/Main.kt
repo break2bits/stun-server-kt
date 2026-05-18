@@ -14,8 +14,6 @@ import com.break2bits.serialize.attribute.XorMappedAddressValueSerializer
 import com.break2bits.serialize.header.StunHeaderWriter
 import kotlin.system.exitProcess
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main(args: Array<String>) {
     val helpArg = BoolArgDefinition("-h", "--help", default = false)
     val portArg = IntArgDefinition("-p", "--port", default = 3478)
