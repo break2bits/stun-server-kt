@@ -18,7 +18,7 @@ import kotlin.system.exitProcess
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main(args: Array<String>) {
     val portArg = IntArgDefinition("-p", "--port", default = 3478)
-    val threadsArg = IntArgDefinition("-t", "--threads", default = 1)
+    val threadsArg = IntArgDefinition("-h", "--threads", default = 1)
     val udpEnabledArg = BoolArgDefinition("-u", "--udp", default = false)
     val tcpEnabledArg = BoolArgDefinition("-t", "--tcp", default = false)
 
